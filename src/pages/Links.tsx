@@ -1,98 +1,142 @@
-import { mockLinks } from '../data/mock';
-import { Search, Copy, BarChart2, DollarSign } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Copy, BarChart2, DollarSign, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../components/auth/AuthContext';
+
+interface LinkData {
+  id: number;
+  originalUrl: string;
+  shortCode: string;
+  shortUrl: string;
+  ctaText: string;
+  visits: number;
+  createdAt: string;
+}
 
 export default function Links() {
+  const { token, isAuthenticated } = useAuth();
+  const [links, setLinks] = useState<LinkData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      const fetchLinks = async () => {
+        try {
+          const response = await fetch('https://noticrisp.com/api/noti/get_links.php', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const data = await response.json();
+          if (response.ok) setLinks(data.links);
+        } catch (error) {
+          console.error("Failed fetching links", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchLinks();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, token]);
+
+  const handleCopy = (txt: string) => {
+    navigator.clipboard.writeText(txt);
+    alert('Enlace copiado al portapapeles');
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-[#0c5562]">Enlaces</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl font-bold text-[#0c5562]">Mis Enlaces</h1>
+        <div className="flex flex-wrap gap-2">
           <button className="bg-[#0c5562] text-white px-4 py-2 rounded text-sm font-medium hover:bg-[#0a4650] transition-colors">
-            Acortar URL
-          </button>
-          <button className="bg-green-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-600 transition-colors">
-            Sugerencias Diarias
-          </button>
-          <button className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors">
-            Trending Links
-          </button>
-          <button className="bg-orange-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-orange-600 transition-colors">
-            Estadísticas
+            Estadísticas Globales
           </button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+        <div className="p-4 border-b border-gray-200 flex flex-wrap justify-between items-center bg-gray-50 gap-4">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            Mostrar
-            <select className="border border-gray-300 rounded px-2 py-1 bg-white">
-              <option>10</option>
-              <option>25</option>
-              <option>50</option>
-            </select>
-            registros
+            {links.length} Enlace(s) Creados
           </div>
           <div className="relative">
             <input
               type="text"
-              className="border border-gray-300 rounded-md pl-8 pr-4 py-1.5 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-[#0c5562]"
-              placeholder="Buscar..."
+              className="border border-gray-300 rounded-md pl-8 pr-4 py-1.5 text-sm w-full sm:w-64 focus:outline-none focus:ring-1 focus:ring-[#0c5562]"
+              placeholder="Buscar enlace..."
             />
             <Search className="w-4 h-4 text-gray-400 absolute left-2.5 top-2" />
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Fecha ↕</th>
-                <th className="px-4 py-3 font-semibold">Llamada a la acción (CTA) ↕</th>
-                <th className="px-4 py-3 font-semibold">URL Acortada ↕</th>
-                <th className="px-4 py-3 font-semibold">Visitas ↕</th>
-                <th className="px-4 py-3 font-semibold">URL Original ↕</th>
-                <th className="px-4 py-3 font-semibold text-center">Estadísticas</th>
-                <th className="px-4 py-3 font-semibold text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockLinks.map((link, idx) => (
-                <tr key={link.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-4 py-3 whitespace-nowrap text-gray-600">{link.date}</td>
-                  <td className="px-4 py-3 max-w-xs truncate" title={link.cta}>{link.cta}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Copy className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
-                      <a href={link.shortUrl} className="text-blue-600 hover:underline truncate max-w-[200px] block">
-                        {link.shortUrl}
-                      </a>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center">{link.visits}</td>
-                  <td className="px-4 py-3">
-                    <a href={link.originalUrl} className="text-blue-600 hover:underline truncate max-w-[200px] block">
-                      {link.originalUrl}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-center gap-2">
-                      <button className="bg-[#0c5562] text-white px-2 py-1 rounded text-xs flex items-center gap-1 hover:bg-[#0a4650]">
-                        <BarChart2 className="w-3 h-3" /> Visitas
-                      </button>
-                      <button className="bg-[#0c5562] text-white px-2 py-1 rounded text-xs flex items-center gap-1 hover:bg-[#0a4650]">
-                        <DollarSign className="w-3 h-3" /> Ganancias
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center text-gray-400 cursor-pointer">
-                    ⋮⋮⋮
-                  </td>
+          {isLoading ? (
+            <div className="p-8 text-center text-gray-500">Cargando enlaces...</div>
+          ) : !isAuthenticated ? (
+            <div className="p-8 text-center text-gray-500">Inicia sesión para ver tus enlaces acortados.</div>
+          ) : links.length === 0 ? (
+            <div className="p-10 flex flex-col items-center justify-center text-center">
+              <LayoutDashboard className="w-12 h-12 text-gray-300 mb-3" />
+              <p className="text-gray-500 font-medium">Aún no tienes enlaces</p>
+              <p className="text-gray-400 text-sm mt-1">Ve a "Acortar Enlace" en el menú para crear tu primero.</p>
+            </div>
+          ) : (
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Fecha</th>
+                  <th className="px-4 py-3 font-semibold">Campaña (CTA)</th>
+                  <th className="px-4 py-3 font-semibold">URL Acortada</th>
+                  <th className="px-4 py-3 font-semibold text-center">Visitas</th>
+                  <th className="px-4 py-3 font-semibold">URL Original</th>
+                  <th className="px-4 py-3 font-semibold text-center">Datos</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {links.map((link) => (
+                  <tr key={link.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-500">
+                      {new Date(link.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-gray-800" title={link.ctaText}>
+                      {link.ctaText || '-'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => handleCopy(link.shortUrl)} className="text-gray-400 hover:text-[#0c5562] transition-colors p-1" title="Copiar enlace">
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        <a href={link.shortUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-medium">
+                          {link.shortUrl.replace('https://', '')}
+                        </a>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold text-xs">
+                        {link.visits}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <a href={link.originalUrl} target="_blank" rel="noreferrer" className="text-gray-500 hover:underline truncate max-w-[200px] block text-xs">
+                        {link.originalUrl}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-center">
+                        <button className="text-gray-400 hover:text-[#0c5562] p-1" title="Próximamente">
+                          <BarChart2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
+
 
         <div className="p-4 border-t border-gray-200 flex justify-between items-center text-sm text-gray-600 bg-gray-50">
           <div>Mostrando registros del 1 al 10 de un total de 25 registros</div>

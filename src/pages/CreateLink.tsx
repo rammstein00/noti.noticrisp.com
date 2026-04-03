@@ -1,9 +1,63 @@
 import { useState } from 'react';
-import { Scissors, Sparkles, Eye } from 'lucide-react';
+import { Scissors, Sparkles, Eye, CheckCircle2, AlertCircle, Copy } from 'lucide-react';
+import { useAuth } from '../components/auth/AuthContext';
 
 export default function CreateLink() {
-  const [url, setUrl] = useState('https://www.youtube.com/watch?v=VV7YqvpOD6c');
-  const [cta, setCta] = useState('nuevo');
+  const [url, setUrl] = useState('');
+  const [cta, setCta] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [shortUrl, setShortUrl] = useState<string | null>(null);
+  
+  const { token, isAuthenticated } = useAuth();
+
+  const handleShorten = async () => {
+    if (!url) {
+      setError('Por favor, ingresa un enlace para acortar.');
+      return;
+    }
+    
+    if (!isAuthenticated || !token) {
+      setError('Debes iniciar sesión para acortar enlaces.');
+      return;
+    }
+
+    setError('');
+    setSuccess('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('https://noticrisp.com/api/noti/create_link.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ originalUrl: url, ctaText: cta }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || 'Error al acortar enlance');
+      
+      setShortUrl(data.link.shortUrl);
+      setSuccess('¡Enlace acortado con éxito!');
+      setUrl('');
+      setCta('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de red.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (shortUrl) {
+      navigator.clipboard.writeText(shortUrl);
+      alert('¡Copiado al portapapeles!');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -11,39 +65,70 @@ export default function CreateLink() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Form Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6 relative">
+          
+          {error && (
+            <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm flex items-center gap-2 border border-red-100">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="p-4 bg-green-50 text-green-700 rounded-md flex flex-col gap-3 border border-green-200">
+              <div className="flex items-center gap-2 font-medium">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                {success}
+              </div>
+              {shortUrl && (
+                <div className="flex bg-white items-center justify-between p-2 rounded border border-green-200 shadow-sm">
+                  <span className="text-sm font-bold text-[#0c5562] break-all">{shortUrl}</span>
+                  <button onClick={copyToClipboard} className="text-gray-400 hover:text-green-600 p-1">
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Enlace *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Enlace de destino *</label>
             <input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://pagina.com/noticia/..."
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0c5562]"
             />
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-gray-700">Llamada a la acción *</label>
-              <span className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">Emoji Selector ~</span>
+              <label className="block text-sm font-medium text-gray-700">Título / Llamada a la acción (Opcional)</label>
             </div>
             <div className="relative">
               <textarea
                 value={cta}
                 onChange={(e) => setCta(e.target.value)}
-                rows={4}
+                placeholder="Ej. ¡Mira esta increíble noticia!"
+                rows={3}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0c5562] resize-none"
               />
-              <button className="absolute bottom-2 right-2 bg-green-500 text-white px-3 py-1 rounded text-xs font-medium flex items-center gap-1 hover:bg-green-600">
-                Sugerir <Sparkles className="w-3 h-3" />
-              </button>
             </div>
           </div>
 
           <div className="flex gap-2">
-            <button className="bg-[#0c5562] text-white px-6 py-2 rounded-md text-sm font-medium flex items-center gap-2 hover:bg-[#0a4650]">
-              <Scissors className="w-4 h-4" />
-              Acortar!
+            <button 
+              onClick={handleShorten}
+              disabled={isLoading || !isAuthenticated}
+              className="bg-[#0c5562] text-white px-6 py-2 rounded-md text-sm font-medium flex items-center gap-2 hover:bg-[#0a4650] disabled:opacity-50 transition-colors"
+            >
+              {isLoading ? 'Recortando...' : (
+                <>
+                  <Scissors className="w-4 h-4" />
+                  Acortar!
+                </>
+              )}
             </button>
             <button className="bg-green-500 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-1 hover:bg-green-600">
               IA <Sparkles className="w-4 h-4" />

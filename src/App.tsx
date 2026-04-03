@@ -14,6 +14,7 @@ import Statistics from './pages/Statistics';
 import Billing from './pages/Billing';
 import Profile from './pages/Profile';
 import Placeholder from './pages/Placeholder';
+import BridgePage from './pages/BridgePage';
 import { AuthProvider } from './components/auth/AuthContext';
 
 export default function App() {
@@ -21,6 +22,10 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public Route for the Link Shortener Bridge Page */}
+          <Route path="/l/:code" element={<BridgePage />} />
+
+          {/* Admin Dashboard Routes */}
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="links" element={<Links />} />
