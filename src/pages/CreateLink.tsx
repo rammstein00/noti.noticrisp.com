@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Scissors, Sparkles, Eye, CheckCircle2, AlertCircle, Copy } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthContext';
 
@@ -10,7 +10,55 @@ export default function CreateLink() {
   const [success, setSuccess] = useState('');
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   
+  const [previewData, setPreviewData] = useState<{title: string, description: string, image: string | null, domain: string}>({
+    title: 'Introduce un enlace para ver la vista previa',
+    description: 'La información y la imagen del artículo original aparecerán aquí automáticamente.',
+    image: null,
+    domain: 'NOTICRISP.COM'
+  });
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  
   const { token, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (!url || !url.startsWith('http')) {
+      setPreviewData({
+        title: 'Introduce un enlace válido',
+        description: 'La información y la imagen del artículo original aparecerán aquí automáticamente.',
+        image: null,
+        domain: 'NOTICRISP.COM'
+      });
+      return;
+    }
+
+    if (!token) return;
+
+    const timeoutId = setTimeout(async () => {
+      setIsLoadingPreview(true);
+      try {
+        const response = await fetch(`https://noticrisp.com/api/noti/fetch_preview.php?url=${encodeURIComponent(url)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setPreviewData({
+            title: data.title,
+            description: data.description,
+            image: data.image,
+            domain: data.domain
+          });
+        }
+      } catch (e) {
+        console.error("Error al cargar la vista previa", e);
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    }, 700);
+
+    return () => clearTimeout(timeoutId);
+  }, [url, token]);
 
   const handleShorten = async () => {
     if (!url) {
@@ -151,21 +199,31 @@ export default function CreateLink() {
           </div>
 
           <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-            <img 
-              src="https://picsum.photos/seed/dota2/600/300" 
-              alt="Preview" 
-              className="w-full h-auto object-cover"
-              referrerPolicy="no-referrer"
-            />
+            {isLoadingPreview ? (
+              <div className="h-48 flex items-center justify-center bg-gray-100 animate-pulse">
+                <span className="text-gray-400 font-medium">Cargando vista previa...</span>
+              </div>
+            ) : previewData.image ? (
+              <img 
+                src={previewData.image} 
+                alt="Preview" 
+                className="w-full h-auto max-h-64 object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="h-48 flex items-center justify-center bg-gray-200 border-b border-gray-200 shadow-inner">
+                <Scissors className="w-10 h-10 text-gray-300" />
+              </div>
+            )}
             <div className="p-4 space-y-2">
               <h3 className="font-bold text-gray-900 leading-tight">
-                ES INCREIBLE EL NIVEL Q TIENE - YANDEX VS PARIVISION - GAME 2 - B02 - DIA 1 - ESL ONE - DOTA 2
+                {isLoadingPreview ? '...' : previewData.title}
               </h3>
               <p className="text-xs text-gray-500 line-clamp-2">
-                ES INCREIBLE EL NIVEL Q TIENE - YANDEX VS PARIVISION - GAME 2 - B02 - DIA 1 - ESL ONE - DOTA 2
+                {isLoadingPreview ? '...' : previewData.description}
               </p>
               <div className="text-xs font-medium text-gray-400 uppercase">
-                NOTICRISP.COM
+                {isLoadingPreview ? '...' : previewData.domain}
               </div>
             </div>
           </div>
