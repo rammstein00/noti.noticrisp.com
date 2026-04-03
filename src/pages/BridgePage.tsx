@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Menu, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function BridgePage() {
@@ -57,18 +57,30 @@ export default function BridgePage() {
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col items-center">
       {/* Fake News Navigation Bar */}
-      <header className="w-full bg-[#3d2780] shadow-md z-10 sticky top-0">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center text-white">
-          <div className="text-2xl font-black italic tracking-tighter mb-3 md:mb-0 cursor-pointer hover:opacity-80 transition-opacity">
-            NotiFresh<span className="text-sm font-normal not-italic">.com</span>
+      <header className="w-full bg-[#035bcc] shadow-md z-10 sticky top-0">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 h-[56px] flex justify-between items-center text-white relative">
+          
+          {/* Menu Hamburger Left */}
+          <button className="p-1 hover:bg-white/10 rounded transition-colors flex items-center">
+            <Menu className="w-8 h-8" strokeWidth={2.5} />
+          </button>
+
+          {/* Logo Center */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center cursor-pointer">
+            <div className="text-xl font-black tracking-tight text-[#ff3b00] drop-shadow-sm flex items-center gap-1">
+              <div className="bg-[#cc0000] text-white text-xs px-1.5 py-0.5 rounded-sm font-bold border border-yellow-500">NC</div>
+              <span>NotiCrisp<span className="text-white">.com</span></span>
+            </div>
+            <div className="text-[7px] sm:text-[8px] text-yellow-400 uppercase font-bold tracking-widest -mt-0.5 drop-shadow-sm">
+              EL MEJOR CONTENIDO DE LA RED
+            </div>
           </div>
-          <nav className="flex flex-wrap justify-center gap-3 text-xs uppercase font-medium tracking-wide">
-            {categories.map((cat) => (
-              <span key={cat} className="cursor-pointer hover:text-orange-400 transition-colors">
-                {cat}
-              </span>
-            ))}
-          </nav>
+
+          {/* Search Icon Right */}
+          <button className="w-10 h-10 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+            <Search className="w-5 h-5 text-white" strokeWidth={2} />
+          </button>
+
         </div>
       </header>
 
