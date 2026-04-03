@@ -103,40 +103,23 @@ export default function BridgePage() {
           {!isLoading && !error && targetUrl && (
             <motion.div 
               key="content"
-              initial={{ opacity: 0, scale: 0.95 }} 
-              animate={{ opacity: 1, scale: 1 }} 
-              className="flex flex-col items-center w-full max-w-md bg-white border border-gray-100 p-10 rounded-3xl shadow-2xl text-center z-10"
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="flex flex-col items-center w-full max-w-lg my-12 z-10"
             >
-              <div className="bg-gray-50 rounded-full p-4 mb-6 ring-4 ring-gray-50">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#ff6b00] to-[#ff3b00] rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-inner">
-                  {countdown > 0 ? countdown : '0'}
-                </div>
-              </div>
-              
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">Tu artículo está casi listo</h1>
-              <p className="text-gray-500 mb-8 text-sm">
-                Hemos verificado la fuente y protegido el enlace temporalmente.<br/>
-                Para continuar leyendo, espera unos instantes.
-              </p>
-
               <button
                 onClick={handleRedirect}
                 disabled={countdown > 0}
-                className={`w-full py-4 text-white font-bold rounded-xl uppercase tracking-wider shadow-lg transition-all transform active:scale-95 ${
-                  countdown > 0 
-                  ? 'bg-gray-300 cursor-not-allowed shadow-none' 
-                  : 'bg-gradient-to-r from-[#ff6b00] to-[#ff3b00] hover:shadow-[#ff6b00]/30 hover:scale-[1.02] cursor-pointer'
-                }`}
+                className={`w-full py-4 px-6 text-white font-medium rounded-md text-xl md:text-2xl tracking-wide transition-all ${countdown === 0 ? 'hover:opacity-90 active:scale-[0.98]' : ''}`}
+                style={{ backgroundColor: '#e24a32' }}
               >
-                {countdown > 0 ? `Artículo completo en: ${countdown} segundos` : 'Ver Artículo ➔'}
+                {countdown > 0 
+                  ? `Articulo completo en: ${countdown} segundos` 
+                  : 'VER ARTÍCULO COMPLETO AQUÍ'}
               </button>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Decorative background blobs to make it look premium */}
-        <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200/40 rounded-full blur-3xl -z-10 animate-pulse"></div>
-        <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDelay: '1s' }}></div>
       </main>
 
       {/* Footer footer */}
