@@ -105,12 +105,12 @@ export default function BridgePage() {
               key="content"
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="flex flex-col items-center w-full max-w-lg my-12 z-10"
+              className="flex flex-col items-center w-full max-w-[92%] sm:max-w-[400px] my-8 z-10"
             >
               <button
                 onClick={handleRedirect}
                 disabled={countdown > 0}
-                className={`w-full py-4 px-6 text-white font-medium rounded-md text-xl md:text-2xl tracking-wide transition-all ${countdown === 0 ? 'hover:opacity-90 active:scale-[0.98]' : ''}`}
+                className={`w-full py-[14px] text-white font-semibold rounded-[4px] text-[16px] sm:text-[17px] transition-all ${countdown === 0 ? 'hover:opacity-90 active:scale-[0.98]' : ''}`}
                 style={{ backgroundColor: '#e24a32' }}
               >
                 {countdown > 0 
