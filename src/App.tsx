@@ -14,31 +14,34 @@ import Statistics from './pages/Statistics';
 import Billing from './pages/Billing';
 import Profile from './pages/Profile';
 import Placeholder from './pages/Placeholder';
+import { AuthProvider } from './components/auth/AuthContext';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="links" element={<Links />} />
-          <Route path="links/create" element={<CreateLink />} />
-          <Route path="trending" element={<Trending />} />
-          <Route path="suggestions" element={<Suggestions />} />
-          <Route path="statistics" element={<Statistics />} />
-          <Route path="billing" element={<Billing />} />
-          <Route path="profile" element={<Profile />} />
-          
-          {/* Placeholders for other routes */}
-          <Route path="ranking" element={<Placeholder title="Ranking y Premios" />} />
-          <Route path="referrals" element={<Placeholder title="Referidos" />} />
-          <Route path="resources" element={<Placeholder title="Recursos y Videos" />} />
-          <Route path="facebook" element={<Placeholder title="Grupos de Facebook" />} />
-          <Route path="info" element={<Placeholder title="Informaciones" />} />
-          <Route path="terms" element={<Placeholder title="Términos y Condiciones" />} />
-          <Route path="support" element={<Placeholder title="Soporte" />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="links" element={<Links />} />
+            <Route path="links/create" element={<CreateLink />} />
+            <Route path="trending" element={<Trending />} />
+            <Route path="suggestions" element={<Suggestions />} />
+            <Route path="statistics" element={<Statistics />} />
+            <Route path="billing" element={<Billing />} />
+            <Route path="profile" element={<Profile />} />
+            
+            {/* Placeholders for other routes */}
+            <Route path="ranking" element={<Placeholder title="Ranking y Premios" />} />
+            <Route path="referrals" element={<Placeholder title="Referidos" />} />
+            <Route path="resources" element={<Placeholder title="Recursos y Videos" />} />
+            <Route path="facebook" element={<Placeholder title="Grupos de Facebook" />} />
+            <Route path="info" element={<Placeholder title="Informaciones" />} />
+            <Route path="terms" element={<Placeholder title="Términos y Condiciones" />} />
+            <Route path="support" element={<Placeholder title="Soporte" />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
