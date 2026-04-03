@@ -33,6 +33,16 @@ export default function BridgePage() {
   }, [code]);
 
   useEffect(() => {
+    // Trigger AdsKeeper load when the target is resolved and content is shown
+    if (!isLoading && !error && targetUrl) {
+      // @ts-ignore
+      window._mgq = window._mgq || [];
+      // @ts-ignore
+      window._mgq.push(["_mgc.load"]);
+    }
+  }, [isLoading, error, targetUrl]);
+
+  useEffect(() => {
     // 2. Iniciar el contador regresivo de 15 a 0
     if (!isLoading && !error && targetUrl && countdown > 0) {
       const timer = setInterval(() => {
@@ -129,6 +139,11 @@ export default function BridgePage() {
                   ? `Articulo completo en: ${countdown} segundos` 
                   : 'VER ARTÍCULO COMPLETO AQUÍ'}
               </button>
+
+              {/* AdsKeeper Widget */}
+              <div className="w-full mt-8">
+                <div data-type="_mgwidget" data-widget-id="1989189"></div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
