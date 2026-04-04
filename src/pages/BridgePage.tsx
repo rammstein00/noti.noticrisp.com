@@ -144,7 +144,7 @@ export default function BridgePage() {
               <button
                 onClick={handleRedirect}
                 disabled={countdown > 0}
-                className={`w-full py-[14px] text-white font-semibold rounded-[4px] text-[16px] sm:text-[17px] transition-all ${countdown === 0 ? 'hover:opacity-90 active:scale-[0.98]' : ''}`}
+                className={`w-[85%] sm:w-[320px] py-[12px] text-white font-semibold rounded-[4px] text-[15px] sm:text-[16px] transition-all ${countdown === 0 ? 'hover:opacity-90 active:scale-[0.98]' : ''}`}
                 style={{ backgroundColor: '#e24a32' }}
               >
                 {countdown > 0 
