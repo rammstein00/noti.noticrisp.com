@@ -21,13 +21,18 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
     setError('');
     setIsLoading(true);
 
+    let loginUser = email;
+    if (loginUser.trim().toLowerCase() === 'gato') {
+      loginUser = 'gato@noticrisp.com';
+    }
+
     try {
       const response = await fetch('https://noticrisp.com/api/noti/login.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: loginUser, password }),
       });
 
       const data = await response.json();
