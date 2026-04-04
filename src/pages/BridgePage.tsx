@@ -127,8 +127,20 @@ export default function BridgePage() {
               key="content"
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="flex flex-col items-center w-full max-w-[92%] sm:max-w-[400px] my-8 z-10"
+              className="flex flex-col items-center w-full max-w-[92%] sm:max-w-[400px] my-4 z-10"
             >
+              {/* Primer Bloque de anuncios (Antes del botón) */}
+              <div className="w-full mb-4">
+                <style>{`div[data-widget-id="1989745"] { min-height: 300px; }`}</style>
+                <div data-type="_mgwidget" data-widget-id="1989745"></div>
+              </div>
+
+              {/* Segundo Bloque de anuncios (Antes del botón) */}
+              <div className="w-full mb-6">
+                <div data-type="_mgwidget" data-widget-id="1989746"></div>
+              </div>
+
+              {/* Botón Principal de Redirección */}
               <button
                 onClick={handleRedirect}
                 disabled={countdown > 0}
@@ -140,10 +152,14 @@ export default function BridgePage() {
                   : 'VER ARTÍCULO COMPLETO AQUÍ'}
               </button>
 
-              {/* AdsKeeper Widget */}
+              {/* Tercer Bloque de anuncios (Debajo del botón) */}
               <div className="w-full mt-8">
-                <div data-type="_mgwidget" data-widget-id="1989189"></div>
+                <div data-type="_mgwidget" data-widget-id="1989747"></div>
               </div>
+
+              {/* Bloque Popup u Oculto */}
+              <div data-type="_mgwidget" data-widget-id="1989749"></div>
+
             </motion.div>
           )}
         </AnimatePresence>
