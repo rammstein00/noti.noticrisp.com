@@ -127,7 +127,7 @@ export default function BridgePage() {
               key="content"
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="flex flex-col items-center w-full max-w-[98%] sm:max-w-[400px] mt-1 mb-4 z-10"
+              className="flex flex-col items-center w-full max-w-[98%] md:max-w-[850px] mt-1 md:mt-4 mb-4 z-10"
             >
               {/* Primer Bloque de anuncios (Antes del botón) */}
               <div className="w-full mb-4">
