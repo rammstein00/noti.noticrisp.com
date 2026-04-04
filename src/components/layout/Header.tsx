@@ -1,22 +1,35 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PlusCircle, DollarSign, LogIn } from 'lucide-react';
+import { PlusCircle, DollarSign, LogIn, Menu } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { UserMenu } from '../auth/UserMenu';
 import { LoginModal } from '../auth/LoginModal';
 import { RegisterModal } from '../auth/RegisterModal';
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps = {}) {
   const { isAuthenticated } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
   return (
     <>
-      <header className="bg-[#cc0000] text-white h-16 flex items-center justify-between px-6 shrink-0 z-40">
-        <div className="flex items-center">
-          <Link to="/" className="text-2xl font-bold italic tracking-tighter">
-            NotiCrisp<span className="text-sm font-normal not-italic">.com</span>
+      <header className="bg-[#cc0000] text-white h-16 flex items-center justify-between px-3 sm:px-6 shrink-0 z-40">
+        <div className="flex items-center gap-3">
+          {onMenuClick && (
+            <button 
+              onClick={onMenuClick}
+              className="md:hidden p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Abrir menú"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          )}
+          <Link to="/" className="text-xl sm:text-2xl font-bold italic tracking-tighter">
+            NotiCrisp<span className="text-xs sm:text-sm font-normal not-italic">.com</span>
           </Link>
         </div>
 

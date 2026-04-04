@@ -42,7 +42,7 @@ const secondaryNav = [
   { name: 'Soporte', href: '/support', icon: HeadphonesIcon },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen = false, onClose = () => {} }: { isOpen?: boolean, onClose?: () => void }) {
   const location = useLocation();
 
   const NavItem = ({ item }: { item: any }) => {
@@ -50,6 +50,7 @@ export default function Sidebar() {
     return (
       <Link
         to={item.href}
+        onClick={onClose}
         className={cn(
           'flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors',
           isActive
@@ -64,7 +65,21 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-full overflow-y-auto">
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={cn(
+        "bg-white border-r border-gray-200 flex flex-col h-full overflow-y-auto transition-transform duration-300 z-50",
+        "fixed md:relative w-64",
+        "inset-y-0 left-0",
+        isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
       <div className="p-4 flex items-center justify-between border-b border-gray-200">
         <div className="flex items-center gap-2">
           <button className="p-1 hover:bg-gray-100 rounded">
@@ -106,5 +121,6 @@ export default function Sidebar() {
         Copyright © Noticrisp 2017-2026<br/>Todos los derechos reservados.
       </div>
     </aside>
+    </>
   );
 }
