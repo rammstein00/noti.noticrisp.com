@@ -95,7 +95,7 @@ export default function BridgePage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-16 flex flex-col items-center justify-center relative">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-1 pt-2 pb-8 sm:px-4 sm:py-16 flex flex-col items-center justify-start relative">
         <AnimatePresence mode="wait">
           {isLoading && (
             <motion.div 
@@ -103,7 +103,7 @@ export default function BridgePage() {
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-4 text-[#3d2780]"
+              className="flex flex-col items-center gap-4 text-[#3d2780] mt-32"
             >
               <Loader2 className="w-12 h-12 animate-spin" />
               <p className="font-medium animate-pulse">Cargando artículo seguro...</p>
@@ -115,7 +115,7 @@ export default function BridgePage() {
               key="error"
               initial={{ opacity: 0, y: 10 }} 
               animate={{ opacity: 1, y: 0 }} 
-              className="bg-red-50 text-red-600 p-8 rounded-2xl max-w-md border border-red-200 text-center shadow-lg"
+              className="bg-red-50 text-red-600 p-8 rounded-2xl max-w-md border border-red-200 text-center shadow-lg mt-32"
             >
               <h2 className="text-xl font-bold mb-2">¡Ups! Algo salió mal</h2>
               <p>{error}</p>
@@ -127,7 +127,7 @@ export default function BridgePage() {
               key="content"
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="flex flex-col items-center w-full max-w-[92%] sm:max-w-[400px] my-4 z-10"
+              className="flex flex-col items-center w-full max-w-[98%] sm:max-w-[400px] mt-1 mb-4 z-10"
             >
               {/* Primer Bloque de anuncios (Antes del botón) */}
               <div className="w-full mb-4">
