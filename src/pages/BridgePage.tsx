@@ -35,10 +35,12 @@ export default function BridgePage() {
   useEffect(() => {
     // Trigger AdsKeeper load when the target is resolved and content is shown
     if (!isLoading && !error && targetUrl) {
-      // @ts-ignore
-      window._mgq = window._mgq || [];
-      // @ts-ignore
-      window._mgq.push(["_mgc.load"]);
+      setTimeout(() => {
+        // @ts-ignore
+        window._mgq = window._mgq || [];
+        // @ts-ignore
+        window._mgq.push(["_mgc.load"]);
+      }, 300);
     }
   }, [isLoading, error, targetUrl]);
 

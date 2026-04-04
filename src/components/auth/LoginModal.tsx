@@ -85,18 +85,18 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Correo electrónico
+                    Usuario
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-gray-500" />
                     </div>
                     <input
-                      type="email"
+                      type="text"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="block w-full pl-10 bg-[#0A0D14] border border-gray-800 rounded-xl py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all outline-none"
-                      placeholder="tu@correo.com"
+                      placeholder="Nombre de usuario"
                       required
                     />
                   </div>
@@ -133,18 +133,6 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
                   )}
                 </button>
               </form>
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-400 text-sm">
-                  ¿No tienes una cuenta?{' '}
-                  <button
-                    onClick={onSwitchToRegister}
-                    className="text-blue-500 hover:text-blue-400 font-medium transition-colors"
-                  >
-                    Regístrate aquí
-                  </button>
-                </p>
-              </div>
             </div>
           </motion.div>
         </>
