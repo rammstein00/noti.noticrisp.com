@@ -67,7 +67,7 @@ export default function BridgePage() {
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col items-center">
       {/* Fake News Navigation Bar */}
-      <header className="w-full bg-[#035bcc] shadow-md z-10 sticky top-0">
+      <header className="w-full bg-[#035bcc] shadow-md z-[99999] sticky top-0">
         <div className="max-w-6xl mx-auto px-3 sm:px-4 h-[56px] flex justify-between items-center text-white relative">
           
           {/* Menu Hamburger Left */}
