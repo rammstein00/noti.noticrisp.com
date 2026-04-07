@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Copy, BarChart2, DollarSign, LayoutDashboard } from 'lucide-react';
+import { Search, Copy, DollarSign, LayoutDashboard, Trash2 } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthContext';
 
 interface LinkData {
@@ -49,6 +49,28 @@ export default function Links() {
     alert('Enlace copiado al portapapeles');
   };
 
+  const handleDelete = async (linkId: number) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este enlace? Esta acción es irreversible y perderás las estadísticas de él.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`https://noticrisp.com/api/noti/delete_link.php?id=${linkId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error || 'No se pudo eliminar el enlace');
+      
+      setLinks(links.filter((l) => l.id !== linkId));
+    } catch (err: any) {
+      alert("Error al borrar: " + err.message);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -95,7 +117,7 @@ export default function Links() {
                   <th className="px-4 py-3 font-semibold">URL Acortada</th>
                   <th className="px-4 py-3 font-semibold text-center">Visitas</th>
                   <th className="px-4 py-3 font-semibold">URL Original</th>
-                  <th className="px-4 py-3 font-semibold text-center">Datos</th>
+                  <th className="px-4 py-3 font-semibold text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -129,8 +151,12 @@ export default function Links() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center">
-                        <button className="text-gray-400 hover:text-[#0c5562] p-1" title="Próximamente">
-                          <BarChart2 className="w-4 h-4" />
+                        <button 
+                          onClick={() => handleDelete(link.id)} 
+                          className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded transition-colors" 
+                          title="Eliminar enlace definitivo"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
