@@ -14,9 +14,11 @@ import {
   Info,
   FileText,
   HeadphonesIcon,
+  UserCog,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useAuth } from '../auth/AuthContext';
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -44,6 +46,7 @@ const secondaryNav = [
 
 export default function Sidebar({ isOpen = false, onClose = () => {} }: { isOpen?: boolean, onClose?: () => void }) {
   const location = useLocation();
+  const { user } = useAuth();
 
   const NavItem = ({ item }: { item: any }) => {
     const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
@@ -95,6 +98,12 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }: { isOpen
         {mainNav.map((item) => (
           <NavItem key={item.name} item={item} />
         ))}
+
+        {user?.role === 'admin' && (
+          <NavItem
+            item={{ name: 'Usuarios', href: '/users', icon: UserCog }}
+          />
+        )}
 
         <div className="mt-8 mb-4 px-4">
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">NOTICRISP</h3>

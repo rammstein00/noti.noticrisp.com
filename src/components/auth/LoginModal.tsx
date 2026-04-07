@@ -22,8 +22,12 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
     setIsLoading(true);
 
     let loginUser = email;
-    if (loginUser.trim().toLowerCase() === 'gato') {
+    const lowerEmail = loginUser.trim().toLowerCase();
+    
+    if (lowerEmail === 'gato') {
       loginUser = 'gato@noticrisp.com';
+    } else if (lowerEmail === 'rammstein00') {
+      loginUser = 'rammstein00@noticrisp.com';
     }
 
     try {

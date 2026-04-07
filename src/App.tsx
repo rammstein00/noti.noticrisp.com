@@ -15,6 +15,7 @@ import Billing from './pages/Billing';
 import Profile from './pages/Profile';
 import Placeholder from './pages/Placeholder';
 import BridgePage from './pages/BridgePage';
+import UsersManagement from './pages/UsersManagement';
 import { AuthProvider } from './components/auth/AuthContext';
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="statistics" element={<Statistics />} />
             <Route path="billing" element={<Billing />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="users" element={<UsersManagement />} />
             
             {/* Placeholders for other routes */}
             <Route path="ranking" element={<Placeholder title="Ranking y Premios" />} />
