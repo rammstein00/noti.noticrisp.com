@@ -13,7 +13,7 @@ interface LinkData {
 }
 
 export default function Links() {
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, impersonatedUser } = useAuth();
   const [links, setLinks] = useState<LinkData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -21,7 +21,11 @@ export default function Links() {
     if (isAuthenticated && token) {
       const fetchLinks = async () => {
         try {
-          const response = await fetch('https://noticrisp.com/api/noti/get_links.php', {
+          const url = impersonatedUser 
+            ? `https://noticrisp.com/api/noti/get_links.php?target_user_id=${impersonatedUser.id}`
+            : 'https://noticrisp.com/api/noti/get_links.php';
+            
+          const response = await fetch(url, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -38,7 +42,7 @@ export default function Links() {
     } else {
       setIsLoading(false);
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, impersonatedUser]);
 
   const handleCopy = (txt: string) => {
     navigator.clipboard.writeText(txt);

@@ -7,20 +7,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [impersonatedUser, setImpersonatedUser] = useState<User | null>(null);
 
   useEffect(() => {
     // Check for saved token and user on load
     const savedToken = localStorage.getItem('noti_token');
     const savedUser = localStorage.getItem('noti_user');
+    const savedImpersona = localStorage.getItem('noti_impersonated');
 
     if (savedToken && savedUser) {
       setToken(savedToken);
       try {
         setUser(JSON.parse(savedUser));
       } catch (e) {
-        // If user data is corrupted, clear everything
         localStorage.removeItem('noti_token');
         localStorage.removeItem('noti_user');
+      }
+    }
+    
+    if (savedImpersona) {
+      try {
+        setImpersonatedUser(JSON.parse(savedImpersona));
+      } catch (e) {
+        localStorage.removeItem('noti_impersonated');
       }
     }
     setIsLoading(false);
@@ -33,9 +42,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('noti_user', JSON.stringify(newUser));
   };
 
+  const impersonateUser = (targetUser: User) => {
+    setImpersonatedUser(targetUser);
+    localStorage.setItem('noti_impersonated', JSON.stringify(targetUser));
+  };
+
+  const clearImpersonation = () => {
+    setImpersonatedUser(null);
+    localStorage.removeItem('noti_impersonated');
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
+    clearImpersonation();
     localStorage.removeItem('noti_token');
     localStorage.removeItem('noti_user');
   };
@@ -46,7 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     isAuthenticated: !!token && !!user,
-    isLoading
+    isLoading,
+    impersonatedUser,
+    impersonateUser,
+    clearImpersonation
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

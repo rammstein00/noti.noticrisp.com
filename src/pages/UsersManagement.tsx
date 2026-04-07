@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../components/auth/AuthContext';
-import { Trash2, UserPlus, Loader2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Trash2, UserPlus, Loader2, AlertTriangle, ShieldCheck, Eye } from 'lucide-react';
 
 export default function UsersManagement() {
-  const { user, token } = useAuth();
+  const { user, token, impersonateUser } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -73,7 +73,6 @@ export default function UsersManagement() {
     setIsCreating(true);
 
     try {
-      // Usar la librería secreta que ya teníamos de registro
       const emailFormatted = newUsername.includes('@') ? newUsername : `${newUsername}@noticrisp.com`;
       const response = await fetch('https://noticrisp.com/api/noti/register.php', {
         method: 'POST',
@@ -98,6 +97,12 @@ export default function UsersManagement() {
     } finally {
       setIsCreating(false);
     }
+  };
+
+  const handleImpersonate = (u: any) => {
+    if (!impersonateUser) return;
+    impersonateUser(u);
+    // You could also auto-navigate to /links here natively
   };
 
   return (
@@ -166,7 +171,7 @@ export default function UsersManagement() {
                     <th className="px-6 py-4 font-semibold text-gray-600">Usuario</th>
                     <th className="px-6 py-4 font-semibold text-gray-600">Login Key (Email Oculto)</th>
                     <th className="px-6 py-4 font-semibold text-gray-600">Rol</th>
-                    <th className="px-6 py-4 font-semibold text-gray-600 text-right">Acción</th>
+                    <th className="px-6 py-4 font-semibold text-gray-600 text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -182,15 +187,24 @@ export default function UsersManagement() {
                           {u.role}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-right flex justify-end gap-2">
                         {u.role !== 'admin' && (
-                          <button 
-                            onClick={() => handleDelete(u.id)}
-                            className="text-red-500 hover:text-red-700 transition-colors p-2 hover:bg-red-50 rounded"
-                            title="Eliminar usuario"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <>
+                            <button 
+                              onClick={() => handleImpersonate(u)}
+                              className="text-blue-500 hover:text-blue-700 transition-colors p-2 hover:bg-blue-50 rounded"
+                              title="Ver como este usuario"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(u.id)}
+                              className="text-red-500 hover:text-red-700 transition-colors p-2 hover:bg-red-50 rounded"
+                              title="Eliminar usuario"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
                         )}
                       </td>
                     </tr>

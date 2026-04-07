@@ -21,4 +21,7 @@ export interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
+  impersonatedUser?: User | null;
+  impersonateUser?: (user: User) => void;
+  clearImpersonation?: () => void;
 }
