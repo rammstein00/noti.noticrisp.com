@@ -7,12 +7,11 @@ export default function BridgePage() {
   const { code } = useParams();
   const [countdown, setCountdown] = useState(15);
   const [targetUrl, setTargetUrl] = useState<string | null>(null);
-  const [ownerId, setOwnerId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Validar código en API y obtener la URL original y ownerId
+    // 1. Validar código en API y obtener la URL original (esto además sumará +1 visita en el backend)
     const fetchTarget = async () => {
       try {
         const response = await fetch(`https://noticrisp.com/api/noti/get_target.php?code=${code}`);
@@ -20,7 +19,6 @@ export default function BridgePage() {
         
         if (response.ok) {
           setTargetUrl(data.originalUrl);
-          setOwnerId(data.ownerId);
         } else {
           setError(data.error || 'Enlace no válido o expirado');
         }
@@ -65,11 +63,6 @@ export default function BridgePage() {
     'Belleza', 'Celebridades', 'Ciencia', 'Cultura', 
     'Curiosidades', 'Deporte', 'Enigmas', 'Estilo de Vida', 'Health', 'Tech'
   ];
-
-  const w_top = Number(ownerId) === 6 ? "1992912" : "1989745";
-  const w_middle = Number(ownerId) === 6 ? "1992913" : "1989746";
-  const w_bottom = Number(ownerId) === 6 ? "1992914" : "1989747";
-  const w_popup = Number(ownerId) === 6 ? "1992915" : "1989749";
 
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col items-center">
@@ -138,13 +131,13 @@ export default function BridgePage() {
             >
               {/* Primer Bloque de anuncios (Antes del botón) */}
               <div className="w-full mb-4">
-                <style>{`div[data-widget-id="${w_top}"] { min-height: 300px; }`}</style>
-                <div data-type="_mgwidget" data-widget-id={w_top}></div>
+                <style>{`div[data-widget-id="1989745"] { min-height: 300px; }`}</style>
+                <div data-type="_mgwidget" data-widget-id="1989745"></div>
               </div>
 
               {/* Segundo Bloque de anuncios (Antes del botón) */}
               <div className="w-full mb-6">
-                <div data-type="_mgwidget" data-widget-id={w_middle}></div>
+                <div data-type="_mgwidget" data-widget-id="1989746"></div>
               </div>
 
               {/* Botón Principal de Redirección */}
@@ -161,11 +154,11 @@ export default function BridgePage() {
 
               {/* Tercer Bloque de anuncios (Debajo del botón) */}
               <div className="w-full mt-8">
-                <div data-type="_mgwidget" data-widget-id={w_bottom}></div>
+                <div data-type="_mgwidget" data-widget-id="1989747"></div>
               </div>
 
               {/* Bloque Popup u Oculto */}
-              <div data-type="_mgwidget" data-widget-id={w_popup}></div>
+              <div data-type="_mgwidget" data-widget-id="1989749"></div>
 
             </motion.div>
           )}

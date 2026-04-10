@@ -1,55 +1,14 @@
-import { useState, useEffect } from 'react';
-import { mockCountryData } from '../data/mock';
-import { Eye, Wallet, Users, BarChart, Info, Loader2 } from 'lucide-react';
+import { mockStats, mockCountryData } from '../data/mock';
+import { Eye, Wallet, Users, BarChart, Info } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import { useAuth } from '../components/auth/AuthContext';
 
 export default function Dashboard() {
   const COLORS = ['#3b82f6', '#6366f1', '#10b981', '#f43f5e', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b'];
-  const { token, isAuthenticated, impersonatedUser } = useAuth();
-  
-  const [stats, setStats] = useState({ visits: 0, earnings: 0, cpm: 0 });
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      const fetchStats = async () => {
-        try {
-          const url = impersonatedUser 
-            ? `https://noticrisp.com/api/noti/adskeeper_sync.php?target_user_id=${impersonatedUser.id}`
-            : 'https://noticrisp.com/api/noti/adskeeper_sync.php';
-            
-          const response = await fetch(url, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          const data = await response.json();
-          if (response.ok && data.success) {
-            const hits = data.stats.hits || 0;
-            const revenue = data.stats.revenue || 0;
-            const cpm = hits > 0 ? (revenue / hits) * 1000 : 0;
-            
-            setStats({
-              visits: hits,
-              earnings: revenue,
-              cpm: Number(cpm.toFixed(2))
-            });
-          }
-        } catch (error) {
-          console.error("Failed fetching live stats", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchStats();
-    }
-  }, [isAuthenticated, token, impersonatedUser]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center text-sm text-gray-500">
-        <span>Estadísticas de AdsKeeper (Tiempo Real / Diario)</span>
+        <span>Última actualización: 2026-04-02 20:50:05</span>
       </div>
 
       {/* Alerts */}
@@ -84,10 +43,11 @@ export default function Dashboard() {
             <Eye className="w-8 h-8 text-white" />
           </div>
           <div className="p-4 flex-1">
-            <div className="text-3xl font-light text-[#0c5562]">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : stats.visits}
-            </div>
-            <div className="text-sm text-gray-500 font-medium">Visitas de Hoy</div>
+            <div className="text-3xl font-light text-[#0c5562]">{mockStats.visits}</div>
+            <div className="text-sm text-gray-500 font-medium">Visitas</div>
+            <a href="/statistics" className="text-xs text-[#0c5562] hover:underline flex items-center gap-1 mt-1">
+              Estadísticas <span className="text-[10px]">▶</span>
+            </a>
           </div>
         </div>
 
@@ -96,10 +56,11 @@ export default function Dashboard() {
             <Wallet className="w-8 h-8 text-white" />
           </div>
           <div className="p-4 flex-1">
-            <div className="text-3xl font-light text-red-500">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : `$${stats.earnings}`}
-            </div>
-            <div className="text-sm text-gray-500 font-medium">Ganancias de Hoy</div>
+            <div className="text-3xl font-light text-red-500">${mockStats.earnings}</div>
+            <div className="text-sm text-gray-500 font-medium">Ganancias</div>
+            <a href="/statistics" className="text-xs text-red-500 hover:underline flex items-center gap-1 mt-1">
+              Estadísticas <span className="text-[10px]">▶</span>
+            </a>
           </div>
         </div>
 
@@ -108,8 +69,11 @@ export default function Dashboard() {
             <Users className="w-8 h-8 text-white" />
           </div>
           <div className="p-4 flex-1">
-            <div className="text-3xl font-light text-purple-500">0</div>
+            <div className="text-3xl font-light text-purple-500">${mockStats.referrals}</div>
             <div className="text-sm text-gray-500 font-medium">Referidos</div>
+            <a href="/referrals" className="text-xs text-purple-500 hover:underline flex items-center gap-1 mt-1">
+              Mis referidos <span className="text-[10px]">▶</span>
+            </a>
           </div>
         </div>
 
@@ -118,10 +82,11 @@ export default function Dashboard() {
             <BarChart className="w-8 h-8 text-white" />
           </div>
           <div className="p-4 flex-1">
-            <div className="text-3xl font-light text-green-500">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : `$${stats.cpm}`}
-            </div>
-            <div className="text-sm text-gray-500 font-medium">eCPM Promedio</div>
+            <div className="text-3xl font-light text-green-500">${mockStats.cpm}</div>
+            <div className="text-sm text-gray-500 font-medium">CPM</div>
+            <a href="/billing" className="text-xs text-green-500 hover:underline flex items-center gap-1 mt-1">
+              Retiro de fondos <span className="text-[10px]">▶</span>
+            </a>
           </div>
         </div>
       </div>
