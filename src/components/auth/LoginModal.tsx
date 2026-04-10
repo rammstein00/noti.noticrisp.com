@@ -21,13 +21,11 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
     setError('');
     setIsLoading(true);
 
-    let loginUser = email;
-    const lowerEmail = loginUser.trim().toLowerCase();
+    let loginUser = email.trim();
     
-    if (lowerEmail === 'gato') {
-      loginUser = 'gato@noticrisp.com';
-    } else if (lowerEmail === 'rammstein00') {
-      loginUser = 'rammstein00@noticrisp.com';
+    // Si el usuario no escribe el @correo.com, el sistema se lo auto-completa
+    if (!loginUser.includes('@')) {
+      loginUser = `${loginUser}@noticrisp.com`;
     }
 
     try {
