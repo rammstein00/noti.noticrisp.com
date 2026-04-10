@@ -66,10 +66,10 @@ export default function BridgePage() {
     'Curiosidades', 'Deporte', 'Enigmas', 'Estilo de Vida', 'Health', 'Tech'
   ];
 
-  const w_top = ownerId === 6 ? "1992912" : "1989745";
-  const w_middle = ownerId === 6 ? "1992913" : "1989746";
-  const w_bottom = ownerId === 6 ? "1992914" : "1989747";
-  const w_popup = ownerId === 6 ? "1992915" : "1989749";
+  const w_top = Number(ownerId) === 6 ? "1992912" : "1989745";
+  const w_middle = Number(ownerId) === 6 ? "1992913" : "1989746";
+  const w_bottom = Number(ownerId) === 6 ? "1992914" : "1989747";
+  const w_popup = Number(ownerId) === 6 ? "1992915" : "1989749";
 
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col items-center">
