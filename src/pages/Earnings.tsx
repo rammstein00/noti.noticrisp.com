@@ -13,8 +13,8 @@ interface DailyStat {
   clicks: number;
 }
 
-interface WeeklyEarning {
-  week: string;
+interface HourlyStat {
+  hour: string;
   revenue: number;
 }
 
@@ -26,7 +26,7 @@ interface WeekdayEarning {
 export default function Earnings() {
   const { token } = useAuth();
   const [dailyData, setDailyData] = useState<DailyStat[]>([]);
-  const [weeklyData, setWeeklyData] = useState<WeeklyEarning[]>([]);
+  const [hourlyData, setHourlyData] = useState<HourlyStat[]>([]);
   const [weekdayData, setWeekdayData] = useState<WeekdayEarning[]>([]);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,39 +36,29 @@ export default function Earnings() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch(`https://noticrisp.com/api/noti/adskeeper_charts.php?token=${token || ''}`, {
-        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
-      });
-      const json = await response.json();
+      const [dailyRes, hourlyRes] = await Promise.all([
+        fetch(`https://noticrisp.com/api/noti/adskeeper_charts.php?token=${token || ''}`, {
+          headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+        }),
+        fetch(`https://noticrisp.com/api/noti/adskeeper_hourly.php?token=${token || ''}`, {
+          headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+        })
+      ]);
       
-      if (json.success && json.data) {
-        setDailyData(json.data);
-        
-        // Total earnings
-        const total = json.data.reduce((acc: number, curr: DailyStat) => acc + curr.revenue, 0);
+      const dailyJson = await dailyRes.json();
+      const hourlyJson = await hourlyRes.json();
+      
+      if (dailyJson.success && dailyJson.data) {
+        setDailyData(dailyJson.data);
+        const total = dailyJson.data.reduce((acc: number, curr: DailyStat) => acc + curr.revenue, 0);
         setTotalEarnings(total);
         
-        // Weekly aggregation
-        const weekly: WeeklyEarning[] = [];
-        for (let i = 0; i < json.data.length; i += 7) {
-          const chunk = json.data.slice(i, i + 7);
-          const weekRevenue = chunk.reduce((acc: number, curr: DailyStat) => acc + curr.revenue, 0);
-          
-          let weekLabel = chunk[0].date;
-          if (chunk.length > 1) {
-            weekLabel = `${chunk[0].date.slice(5)} al ${chunk[chunk.length - 1].date.slice(5)}`;
-          }
-          
-          weekly.push({ week: weekLabel, revenue: Math.round(weekRevenue * 100) / 100 });
-        }
-        setWeeklyData(weekly);
-
-        // Weekday aggregation (Domingo-Sábado)
+        // Weekday aggregation
         const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         const dayTotals: number[] = [0, 0, 0, 0, 0, 0, 0];
         const dayCounts: number[] = [0, 0, 0, 0, 0, 0, 0];
         
-        json.data.forEach((d: DailyStat) => {
+        dailyJson.data.forEach((d: DailyStat) => {
           const dayOfWeek = new Date(d.date + 'T12:00:00').getDay();
           dayTotals[dayOfWeek] += d.revenue;
           dayCounts[dayOfWeek]++;
@@ -80,7 +70,11 @@ export default function Earnings() {
         }));
         setWeekdayData(weekday);
       } else {
-        setError(json.error || 'Error al obtener datos');
+        setError(dailyJson.error || 'Error al obtener datos');
+      }
+
+      if (hourlyJson.success && hourlyJson.data) {
+        setHourlyData(hourlyJson.data);
       }
     } catch (err) {
       setError('Problema de conexión con la estadística');
@@ -171,17 +165,17 @@ export default function Earnings() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 2. Ganancias Semanales */}
+        {/* 2. Ganancias por Hora del Día */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-center font-bold text-gray-800 mb-6">Ganancias por Semana</h2>
+          <h2 className="text-center font-bold text-gray-800 mb-6">Ganancias por Hora del Día</h2>
           <div className="h-[300px]">
             {isLoading ? (
               <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklyData}>
+                <LineChart data={hourlyData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#e5e7eb" />
-                  <XAxis dataKey="week" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} />
+                  <XAxis dataKey="hour" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} label={{ value: 'Horas', position: 'insideBottom', offset: -5, fill: '#6b7280' }} />
                   <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
                   <Tooltip content={<EarningsTooltip />} />
                   <Line type="monotone" dataKey="revenue" stroke="#38bdf8" strokeWidth={2} dot={{ fill: '#38bdf8', stroke: '#fff', strokeWidth: 2, r: 4 }} />
@@ -201,7 +195,7 @@ export default function Earnings() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={weekdayData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#e5e7eb" />
-                  <XAxis dataKey="day" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} />
+                  <XAxis dataKey="day" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} label={{ value: 'Días de la Semana', position: 'insideBottom', offset: -5, fill: '#6b7280' }} />
                   <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
                   <Tooltip content={<EarningsTooltip />} />
                   <Bar dataKey="revenue" fill="#38bdf8" radius={[4, 4, 0, 0]} />

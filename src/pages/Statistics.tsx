@@ -12,15 +12,21 @@ interface DailyStat {
   revenue: number;
 }
 
-interface WeeklyStat {
-  week: string;
+interface HourlyStat {
+  hour: string;
+  visitas: number;
+}
+
+interface WeekdayStat {
+  day: string;
   visitas: number;
 }
 
 export default function Statistics() {
   const { token } = useAuth();
   const [dailyData, setDailyData] = useState<DailyStat[]>([]);
-  const [weeklyData, setWeeklyData] = useState<WeeklyStat[]>([]);
+  const [hourlyData, setHourlyData] = useState<HourlyStat[]>([]);
+  const [weekdayData, setWeekdayData] = useState<WeekdayStat[]>([]);
   const [totalVisits, setTotalVisits] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -29,31 +35,45 @@ export default function Statistics() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch(`https://noticrisp.com/api/noti/adskeeper_charts.php?token=${token || ''}`, {
-        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
-      });
-      const json = await response.json();
+      const [dailyRes, hourlyRes] = await Promise.all([
+        fetch(`https://noticrisp.com/api/noti/adskeeper_charts.php?token=${token || ''}`, {
+          headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+        }),
+        fetch(`https://noticrisp.com/api/noti/adskeeper_hourly.php?token=${token || ''}`, {
+          headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+        })
+      ]);
       
-      if (json.success && json.data) {
-        setDailyData(json.data);
-        const total = json.data.reduce((acc: number, curr: DailyStat) => acc + curr.visitas, 0);
+      const dailyJson = await dailyRes.json();
+      const hourlyJson = await hourlyRes.json();
+      
+      if (dailyJson.success && dailyJson.data) {
+        setDailyData(dailyJson.data);
+        const total = dailyJson.data.reduce((acc: number, curr: DailyStat) => acc + curr.visitas, 0);
         setTotalVisits(total);
         
-        const weekly: WeeklyStat[] = [];
-        for (let i = 0; i < json.data.length; i += 7) {
-          const chunk = json.data.slice(i, i + 7);
-          const weekVisits = chunk.reduce((acc: number, curr: DailyStat) => acc + curr.visitas, 0);
-          
-          let weekLabel = chunk[0].date;
-          if (chunk.length > 1) {
-            weekLabel = `${chunk[0].date.slice(5)} al ${chunk[chunk.length - 1].date.slice(5)}`;
-          }
-          
-          weekly.push({ week: weekLabel, visitas: weekVisits });
-        }
-        setWeeklyData(weekly);
+        // Weekday aggregation
+        const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const dayTotals: number[] = [0, 0, 0, 0, 0, 0, 0];
+        const dayCounts: number[] = [0, 0, 0, 0, 0, 0, 0];
+        
+        dailyJson.data.forEach((d: DailyStat) => {
+          const dayOfWeek = new Date(d.date + 'T12:00:00').getDay();
+          dayTotals[dayOfWeek] += d.visitas;
+          dayCounts[dayOfWeek]++;
+        });
+        
+        const weekday: WeekdayStat[] = dayNames.map((name, i) => ({
+          day: name,
+          visitas: dayCounts[i] > 0 ? Math.round(dayTotals[i] / dayCounts[i]) : 0
+        }));
+        setWeekdayData(weekday);
       } else {
-        setError(json.error || 'Error al obtener datos');
+        setError(dailyJson.error || 'Error al obtener datos');
+      }
+
+      if (hourlyJson.success && hourlyJson.data) {
+        setHourlyData(hourlyJson.data);
       }
     } catch (err) {
       setError('Problema de conexión con la estadística');
@@ -66,19 +86,14 @@ export default function Statistics() {
     fetchCharts();
   }, [token]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const VisitsTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white border border-gray-200 p-3 rounded shadow-lg text-sm">
           <p className="text-gray-500 mb-1">{label}</p>
-          <p className="text-[#3b82f6] font-bold">
+          <p className="text-[#38bdf8] font-bold">
             Visitas: {payload[0].value.toLocaleString()}
           </p>
-          {payload[0].payload.revenue !== undefined && (
-            <p className="text-[#10b981] font-bold">
-              Ganado: ${payload[0].payload.revenue.toFixed(2)}
-            </p>
-          )}
         </div>
       );
     }
@@ -113,7 +128,7 @@ export default function Statistics() {
         </div>
       )}
 
-      {/* Top Value (NotiFresh style) */}
+      {/* Top Value */}
       <div className="flex justify-center">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex overflow-hidden w-72">
           <div className="bg-[#8bc34a] p-4 flex items-center justify-center w-20 shrink-0">
@@ -143,7 +158,7 @@ export default function Statistics() {
                 <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#e5e7eb" />
                 <XAxis dataKey="date" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} tickFormatter={(date) => date.split('-').slice(1).join('-')} angle={-45} textAnchor="end" height={60} />
                 <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<VisitsTooltip />} />
                 <Line type="monotone" dataKey="visitas" stroke="#38bdf8" strokeWidth={2} dot={{ fill: '#38bdf8', stroke: '#fff', strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
@@ -152,41 +167,41 @@ export default function Statistics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 2. Visitas por Día (Detailed Line/Bar) */}
+        {/* 2. Visitas por Hora del Día */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-center font-bold text-gray-800 mb-6">Volumen de Visitas por Día</h2>
+          <h2 className="text-center font-bold text-gray-800 mb-6">Visitas por Hora del Día</h2>
           <div className="h-[300px]">
             {isLoading ? (
               <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dailyData.slice(-14)}> 
+                <LineChart data={hourlyData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#e5e7eb" />
-                  <XAxis dataKey="date" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} tickFormatter={(date) => date.split('-').slice(1).join('-')} />
+                  <XAxis dataKey="hour" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} label={{ value: 'Horas', position: 'insideBottom', offset: -5, fill: '#6b7280' }} />
                   <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                  <Bar dataKey="visitas" fill="#38bdf8" />
-                </BarChart>
+                  <Tooltip content={<VisitsTooltip />} />
+                  <Line type="monotone" dataKey="visitas" stroke="#38bdf8" strokeWidth={2} dot={{ fill: '#38bdf8', stroke: '#fff', strokeWidth: 2, r: 4 }} />
+                </LineChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        {/* 3. Visitas por Semana */}
+        {/* 3. Visitas por Día de la Semana */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-center font-bold text-gray-800 mb-6">Visitas por Semana</h2>
+          <h2 className="text-center font-bold text-gray-800 mb-6">Visitas por Día de la Semana</h2>
           <div className="h-[300px]">
             {isLoading ? (
               <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklyData}>
+                <BarChart data={weekdayData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#e5e7eb" />
-                  <XAxis dataKey="week" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} />
+                  <XAxis dataKey="day" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} label={{ value: 'Días de la Semana', position: 'insideBottom', offset: -5, fill: '#6b7280' }} />
                   <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11 }} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="visitas" stroke="#38bdf8" strokeWidth={2} dot={{ fill: '#38bdf8', stroke: '#fff', strokeWidth: 2, r: 4 }} />
-                </LineChart>
+                  <Tooltip content={<VisitsTooltip />} />
+                  <Bar dataKey="visitas" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             )}
           </div>
