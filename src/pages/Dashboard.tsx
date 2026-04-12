@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { mockStats, mockCountryData } from '../data/mock';
 import { Eye, Wallet, Users, BarChart, Info, Loader2, RefreshCw } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
+  const { token } = useAuth();
   const COLORS = ['#3b82f6', '#6366f1', '#10b981', '#f43f5e', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b'];
 
   const [stats, setStats] = useState<{ visitas: number; clicks: number; revenue: number; cpm: number } | null>(null);
@@ -15,7 +17,9 @@ export default function Dashboard() {
     setIsLoading(true);
     setApiError('');
     try {
-      const response = await fetch('https://noticrisp.com/api/noti/adskeeper_stats.php?interval=today');
+      const response = await fetch('https://noticrisp.com/api/noti/adskeeper_stats.php?interval=today', {
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      });
       const data = await response.json();
       if (data.success) {
         setStats(data.stats);
@@ -34,7 +38,7 @@ export default function Dashboard() {
     fetchStats();
     const timer = setInterval(fetchStats, 5 * 60 * 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [token]);
 
   const displayVisitas = stats ? stats.visitas.toLocaleString() : mockStats.visits;
   const displayRevenue = stats ? `$${stats.revenue.toFixed(2)}` : `$${mockStats.earnings}`;

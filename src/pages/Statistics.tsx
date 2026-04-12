@@ -4,6 +4,7 @@ import {
   LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import { useAuth } from '../contexts/AuthContext';
 
 interface DailyStat {
   date: string;
@@ -17,6 +18,7 @@ interface WeeklyStat {
 }
 
 export default function Statistics() {
+  const { token } = useAuth();
   const [dailyData, setDailyData] = useState<DailyStat[]>([]);
   const [weeklyData, setWeeklyData] = useState<WeeklyStat[]>([]);
   const [totalVisits, setTotalVisits] = useState(0);
@@ -27,7 +29,9 @@ export default function Statistics() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch('https://noticrisp.com/api/noti/adskeeper_charts.php');
+      const response = await fetch('https://noticrisp.com/api/noti/adskeeper_charts.php', {
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      });
       const json = await response.json();
       
       if (json.success && json.data) {
@@ -60,7 +64,7 @@ export default function Statistics() {
 
   useEffect(() => {
     fetchCharts();
-  }, []);
+  }, [token]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
