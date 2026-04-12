@@ -1,14 +1,64 @@
+import { useState, useEffect } from 'react';
 import { mockStats, mockCountryData } from '../data/mock';
-import { Eye, Wallet, Users, BarChart, Info } from 'lucide-react';
+import { Eye, Wallet, Users, BarChart, Info, Loader2, RefreshCw } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 
 export default function Dashboard() {
   const COLORS = ['#3b82f6', '#6366f1', '#10b981', '#f43f5e', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b'];
 
+  const [stats, setStats] = useState<{ impressions: number; clicks: number; revenue: number; ecpm: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState('');
+  const [apiError, setApiError] = useState('');
+
+  const fetchStats = async () => {
+    setIsLoading(true);
+    setApiError('');
+    try {
+      const response = await fetch('https://noticrisp.com/api/noti/adskeeper_stats.php?interval=today');
+      const data = await response.json();
+      if (data.success) {
+        setStats(data.stats);
+        setLastUpdate(new Date().toLocaleString('es-MX', { hour12: false }));
+      } else {
+        setApiError(data.error || 'Error desconocido');
+      }
+    } catch (err) {
+      setApiError('No se pudo conectar al servidor');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    // Auto-refrescar cada 5 minutos
+    const timer = setInterval(fetchStats, 5 * 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const displayImpressions = stats ? stats.impressions.toLocaleString() : mockStats.visits;
+  const displayRevenue = stats ? `$${stats.revenue.toFixed(2)}` : `$${mockStats.earnings}`;
+  const displayClicks = stats ? stats.clicks.toLocaleString() : `$${mockStats.referrals}`;
+  const displayEcpm = stats ? `$${stats.ecpm.toFixed(2)}` : `$${mockStats.cpm}`;
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center text-sm text-gray-500">
-        <span>Última actualización: 2026-04-02 20:50:05</span>
+        <span>
+          {isLoading ? 'Sincronizando con AdsKeeper...' : 
+           apiError ? `⚠️ ${apiError} — mostrando datos de referencia` :
+           `✅ AdsKeeper en vivo · Última sync: ${lastUpdate}`}
+        </span>
+        <button 
+          onClick={fetchStats} 
+          disabled={isLoading}
+          className="flex items-center gap-1 text-[#0c5562] hover:text-[#0a4650] transition-colors disabled:opacity-50"
+          title="Refrescar estadísticas"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline">Refrescar</span>
+        </button>
       </div>
 
       {/* Alerts */}
@@ -43,11 +93,10 @@ export default function Dashboard() {
             <Eye className="w-8 h-8 text-white" />
           </div>
           <div className="p-4 flex-1">
-            <div className="text-3xl font-light text-[#0c5562]">{mockStats.visits}</div>
-            <div className="text-sm text-gray-500 font-medium">Visitas</div>
-            <a href="/statistics" className="text-xs text-[#0c5562] hover:underline flex items-center gap-1 mt-1">
-              Estadísticas <span className="text-[10px]">▶</span>
-            </a>
+            <div className="text-3xl font-light text-[#0c5562]">
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : displayImpressions}
+            </div>
+            <div className="text-sm text-gray-500 font-medium">Impresiones Hoy</div>
           </div>
         </div>
 
@@ -56,11 +105,10 @@ export default function Dashboard() {
             <Wallet className="w-8 h-8 text-white" />
           </div>
           <div className="p-4 flex-1">
-            <div className="text-3xl font-light text-red-500">${mockStats.earnings}</div>
-            <div className="text-sm text-gray-500 font-medium">Ganancias</div>
-            <a href="/statistics" className="text-xs text-red-500 hover:underline flex items-center gap-1 mt-1">
-              Estadísticas <span className="text-[10px]">▶</span>
-            </a>
+            <div className="text-3xl font-light text-red-500">
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : displayRevenue}
+            </div>
+            <div className="text-sm text-gray-500 font-medium">Ganancias Hoy</div>
           </div>
         </div>
 
@@ -69,11 +117,10 @@ export default function Dashboard() {
             <Users className="w-8 h-8 text-white" />
           </div>
           <div className="p-4 flex-1">
-            <div className="text-3xl font-light text-purple-500">${mockStats.referrals}</div>
-            <div className="text-sm text-gray-500 font-medium">Referidos</div>
-            <a href="/referrals" className="text-xs text-purple-500 hover:underline flex items-center gap-1 mt-1">
-              Mis referidos <span className="text-[10px]">▶</span>
-            </a>
+            <div className="text-3xl font-light text-purple-500">
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : displayClicks}
+            </div>
+            <div className="text-sm text-gray-500 font-medium">Clics Hoy</div>
           </div>
         </div>
 
@@ -82,11 +129,10 @@ export default function Dashboard() {
             <BarChart className="w-8 h-8 text-white" />
           </div>
           <div className="p-4 flex-1">
-            <div className="text-3xl font-light text-green-500">${mockStats.cpm}</div>
-            <div className="text-sm text-gray-500 font-medium">CPM</div>
-            <a href="/billing" className="text-xs text-green-500 hover:underline flex items-center gap-1 mt-1">
-              Retiro de fondos <span className="text-[10px]">▶</span>
-            </a>
+            <div className="text-3xl font-light text-green-500">
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : displayEcpm}
+            </div>
+            <div className="text-sm text-gray-500 font-medium">eCPM</div>
           </div>
         </div>
       </div>
