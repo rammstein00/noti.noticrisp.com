@@ -63,7 +63,8 @@ export default function Dashboard() {
   const displayVisitas = userVisits !== null ? userVisits.toLocaleString() : mockStats.visits;
   const displayRevenue = stats ? `$${stats.revenue.toFixed(2)}` : `$${mockStats.earnings}`;
   const displayClicks = stats ? stats.clicks.toLocaleString() : `$${mockStats.referrals}`;
-  const displayEcpm = stats ? `$${stats.ecpm.toFixed(2)}` : `$${mockStats.cpm}`;
+  const cpm = (stats && userVisits && userVisits > 0) ? (stats.revenue / userVisits) * 1000 : 0;
+  const displayCpm = (stats && userVisits !== null) ? `$${cpm.toFixed(2)}` : `$${mockStats.cpm}`;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -153,9 +154,9 @@ export default function Dashboard() {
           </div>
           <div className="p-4 flex-1">
             <div className="text-3xl font-light text-green-500">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : displayEcpm}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : displayCpm}
             </div>
-            <div className="text-sm text-gray-500 font-medium">eCPM</div>
+            <div className="text-sm text-gray-500 font-medium">CPM</div>
           </div>
         </div>
       </div>
