@@ -15,6 +15,8 @@ import {
   FileText,
   HeadphonesIcon,
   UserCog,
+  Eye,
+  Wallet,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -30,7 +32,6 @@ const mainNav = [
   { name: 'Trending Links', href: '/trending', icon: TrendingUp },
   { name: 'Sugerencias Enlaces', href: '/suggestions', icon: Lightbulb },
   { name: 'Facturación', href: '/billing', icon: CreditCard },
-  { name: 'Estadísticas', href: '/statistics', icon: BarChart2 },
   { name: 'Ranking y Premios', href: '/ranking', icon: Trophy },
   { name: 'Referidos', href: '/referrals', icon: Users },
   { name: 'Recursos y Videos', href: '/resources', icon: Video },
@@ -98,6 +99,16 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }: { isOpen
         {mainNav.map((item) => (
           <NavItem key={item.name} item={item} />
         ))}
+
+        {/* Estadísticas Section */}
+        <div className="mt-2 mb-1 px-4">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+            <BarChart2 className="w-3.5 h-3.5" />
+            Estadísticas
+          </h3>
+        </div>
+        <NavItem item={{ name: 'Visitas', href: '/statistics', icon: Eye }} />
+        <NavItem item={{ name: 'Ganancias', href: '/earnings', icon: Wallet }} />
 
         {user?.role === 'admin' && (
           <NavItem

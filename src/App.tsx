@@ -11,6 +11,7 @@ import CreateLink from './pages/CreateLink';
 import Trending from './pages/Trending';
 import Suggestions from './pages/Suggestions';
 import Statistics from './pages/Statistics';
+import Earnings from './pages/Earnings';
 import Billing from './pages/Billing';
 import Profile from './pages/Profile';
 import Placeholder from './pages/Placeholder';
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="trending" element={<Trending />} />
             <Route path="suggestions" element={<Suggestions />} />
             <Route path="statistics" element={<Statistics />} />
+            <Route path="earnings" element={<Earnings />} />
             <Route path="billing" element={<Billing />} />
             <Route path="profile" element={<Profile />} />
             <Route path="users" element={<UsersManagement />} />
