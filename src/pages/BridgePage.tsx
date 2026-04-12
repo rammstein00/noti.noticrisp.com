@@ -67,11 +67,12 @@ export default function BridgePage() {
   ];
 
   // Logic map for widget multi-tenancy
-  const isManolo = ownerId == 9;
-  const widgetTop = isManolo ? "1993803" : "1989745";
-  const widgetMid = isManolo ? "1993804" : "1989746";
-  const widgetBot = isManolo ? "1993805" : "1989747";
-  const widgetPop = isManolo ? "1993806" : "1989749";
+  const widgetMap: Record<number, [string, string, string, string]> = {
+    9:  ["1993803", "1993804", "1993805", "1993806"], // Manolo
+    10: ["1993821", "1993822", "1993823", "1993824"], // Fermin
+  };
+  const defaultWidgets: [string, string, string, string] = ["1989745", "1989746", "1989747", "1989749"]; // Gato/Admin
+  const [widgetTop, widgetMid, widgetBot, widgetPop] = (ownerId && widgetMap[ownerId]) ? widgetMap[ownerId] : defaultWidgets;
 
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col items-center">
