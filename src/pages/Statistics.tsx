@@ -29,7 +29,7 @@ export default function Statistics() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch('https://noticrisp.com/api/noti/adskeeper_charts.php', {
+      const response = await fetch(`https://noticrisp.com/api/noti/adskeeper_charts.php?token=${token || ''}`, {
         headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
       });
       const json = await response.json();

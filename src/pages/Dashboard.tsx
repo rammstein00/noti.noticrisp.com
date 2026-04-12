@@ -17,7 +17,7 @@ export default function Dashboard() {
     setIsLoading(true);
     setApiError('');
     try {
-      const response = await fetch('https://noticrisp.com/api/noti/adskeeper_stats.php?interval=today', {
+      const response = await fetch(`https://noticrisp.com/api/noti/adskeeper_stats.php?interval=today&token=${token || ''}`, {
         headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
       });
       const data = await response.json();
