@@ -16,7 +16,9 @@ import Profile from './pages/Profile';
 import Placeholder from './pages/Placeholder';
 import BridgePage from './pages/BridgePage';
 import UsersManagement from './pages/UsersManagement';
+import Login from './pages/Login';
 import { AuthProvider } from './components/auth/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 export default function App() {
   return (
@@ -25,9 +27,13 @@ export default function App() {
         <Routes>
           {/* Public Route for the Link Shortener Bridge Page */}
           <Route path="/l/:code" element={<BridgePage />} />
+          
+          {/* Public Login Route */}
+          <Route path="/login" element={<Login />} />
 
-          {/* Admin Dashboard Routes */}
-          <Route path="/" element={<Layout />}>
+          {/* Admin Dashboard Routes (Protected) */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="links" element={<Links />} />
             <Route path="links/create" element={<CreateLink />} />
@@ -46,6 +52,7 @@ export default function App() {
             <Route path="info" element={<Placeholder title="Informaciones" />} />
             <Route path="terms" element={<Placeholder title="Términos y Condiciones" />} />
             <Route path="support" element={<Placeholder title="Soporte" />} />
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>
