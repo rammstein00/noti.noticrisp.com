@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { mockStats, mockCountryData } from '../data/mock';
 import { Eye, Wallet, Users, BarChart, Info, Loader2, RefreshCw } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../components/auth/AuthContext';
 
 export default function Dashboard() {
   const { token } = useAuth();
