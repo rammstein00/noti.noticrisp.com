@@ -2,18 +2,41 @@ import { useState, useEffect } from 'react';
 import { mockStats, mockCountryData } from '../data/mock';
 import { Eye, Wallet, Users, BarChart, Info, Loader2, RefreshCw } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { useAuth } from '../components/auth/AuthContext';
 
 export default function Dashboard() {
   const COLORS = ['#3b82f6', '#6366f1', '#10b981', '#f43f5e', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b'];
+  const { token, impersonatedUser } = useAuth();
 
-  const [stats, setStats] = useState<{ visitas: number; impressions: number; clicks: number; revenue: number; ecpm: number } | null>(null);
+  const [stats, setStats] = useState<{ clicks: number; revenue: number; ecpm: number } | null>(null);
+  const [userVisits, setUserVisits] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState('');
   const [apiError, setApiError] = useState('');
 
-  const fetchStats = async () => {
+  const fetchAll = async () => {
     setIsLoading(true);
     setApiError('');
+    
+    // 1. Fetch visitas desde nuestra propia base de datos (sistema por dispositivo)
+    if (token) {
+      try {
+        const visitUrl = impersonatedUser
+          ? `https://noticrisp.com/api/noti/get_user_visits.php?target_user_id=${impersonatedUser.id}`
+          : 'https://noticrisp.com/api/noti/get_user_visits.php';
+        const visitRes = await fetch(visitUrl, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const visitData = await visitRes.json();
+        if (visitData.success) {
+          setUserVisits(visitData.total_visits);
+        }
+      } catch (err) {
+        // Silently fail for visits, will show mock data
+      }
+    }
+
+    // 2. Fetch ganancias/clics/ecpm desde AdsKeeper API
     try {
       const response = await fetch('https://noticrisp.com/api/noti/adskeeper_stats.php?interval=today');
       const data = await response.json();
@@ -31,13 +54,13 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchStats();
+    fetchAll();
     // Auto-refrescar cada 5 minutos
-    const timer = setInterval(fetchStats, 5 * 60 * 1000);
+    const timer = setInterval(fetchAll, 5 * 60 * 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [token, impersonatedUser]);
 
-  const displayVisitas = stats ? stats.visitas.toLocaleString() : mockStats.visits;
+  const displayVisitas = userVisits !== null ? userVisits.toLocaleString() : mockStats.visits;
   const displayRevenue = stats ? `$${stats.revenue.toFixed(2)}` : `$${mockStats.earnings}`;
   const displayClicks = stats ? stats.clicks.toLocaleString() : `$${mockStats.referrals}`;
   const displayEcpm = stats ? `$${stats.ecpm.toFixed(2)}` : `$${mockStats.cpm}`;
@@ -51,7 +74,7 @@ export default function Dashboard() {
            `✅ AdsKeeper en vivo · Última sync: ${lastUpdate}`}
         </span>
         <button 
-          onClick={fetchStats} 
+          onClick={fetchAll} 
           disabled={isLoading}
           className="flex items-center gap-1 text-[#0c5562] hover:text-[#0a4650] transition-colors disabled:opacity-50"
           title="Refrescar estadísticas"
