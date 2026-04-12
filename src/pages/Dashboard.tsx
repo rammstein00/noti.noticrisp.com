@@ -6,7 +6,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } 
 export default function Dashboard() {
   const COLORS = ['#3b82f6', '#6366f1', '#10b981', '#f43f5e', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b'];
 
-  const [stats, setStats] = useState<{ impressions: number; clicks: number; revenue: number; ecpm: number } | null>(null);
+  const [stats, setStats] = useState<{ visitas: number; impressions: number; clicks: number; revenue: number; ecpm: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState('');
   const [apiError, setApiError] = useState('');
@@ -37,7 +37,7 @@ export default function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  const displayImpressions = stats ? stats.impressions.toLocaleString() : mockStats.visits;
+  const displayVisitas = stats ? stats.visitas.toLocaleString() : mockStats.visits;
   const displayRevenue = stats ? `$${stats.revenue.toFixed(2)}` : `$${mockStats.earnings}`;
   const displayClicks = stats ? stats.clicks.toLocaleString() : `$${mockStats.referrals}`;
   const displayEcpm = stats ? `$${stats.ecpm.toFixed(2)}` : `$${mockStats.cpm}`;
@@ -94,9 +94,9 @@ export default function Dashboard() {
           </div>
           <div className="p-4 flex-1">
             <div className="text-3xl font-light text-[#0c5562]">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : displayImpressions}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mt-1" /> : displayVisitas}
             </div>
-            <div className="text-sm text-gray-500 font-medium">Impresiones Hoy</div>
+            <div className="text-sm text-gray-500 font-medium">Visitas</div>
           </div>
         </div>
 
