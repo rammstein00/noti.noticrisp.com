@@ -11,7 +11,7 @@ export default function BridgePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Validar código en API y obtener la URL original
+    // Validar código en API y obtener la URL original
     const fetchTarget = async () => {
       try {
         const response = await fetch(`https://noticrisp.com/api/noti/get_target.php?code=${code}`);
@@ -19,22 +19,6 @@ export default function BridgePage() {
         
         if (response.ok) {
           setTargetUrl(data.originalUrl);
-          
-          // 2. Deduplicación por dispositivo: 1 vista cada 30 min por enlace
-          const storageKey = `noti_visit_${code}`;
-          const lastVisit = localStorage.getItem(storageKey);
-          const now = Date.now();
-          const THIRTY_MINUTES = 30 * 60 * 1000;
-          
-          if (!lastVisit || (now - parseInt(lastVisit)) > THIRTY_MINUTES) {
-            // Han pasado 30+ min (o es la primera vez) → contar visita
-            localStorage.setItem(storageKey, now.toString());
-            fetch('https://noticrisp.com/api/noti/count_visit.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ code })
-            }).catch(() => {}); // Fire and forget
-          }
         } else {
           setError(data.error || 'Enlace no válido o expirado');
         }
