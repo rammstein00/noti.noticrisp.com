@@ -19,6 +19,11 @@ export default function BridgePage() {
         const data = await response.json();
         
         if (response.ok) {
+          // 15% de las veces, redirigir al intermedio de noticriisp.com
+          if (data.mirrored && Math.random() < 0.15) {
+            window.location.href = `https://noti.noticriisp.com/l/${code}`;
+            return;
+          }
           setTargetUrl(data.originalUrl);
           setOwnerId(data.ownerId);
         } else {
