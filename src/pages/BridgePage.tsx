@@ -15,12 +15,23 @@ export default function BridgePage() {
     // Validar código en API y obtener la URL original y owner
     const fetchTarget = async () => {
       try {
-        const response = await fetch(`https://noticrisp.com/api/noti/get_target.php?code=${code}`);
+        // Hacemos ambas consultas en paralelo (Base de datos + Geolocalización por Cloudflare Trace API gratuita e ilimitada)
+        const [response, traceResponse] = await Promise.all([
+          fetch(`https://noticrisp.com/api/noti/get_target.php?code=${code}`),
+          fetch('https://1.1.1.1/cdn-cgi/trace').catch(() => ({ text: () => 'loc=XX' } as any))
+        ]);
+        
         const data = await response.json();
+        const traceText = await traceResponse.text();
+        
+        // Extraer el país de la respuesta de Cloudflare (viene en formato "loc=CU")
+        const locMatch = traceText.match(/loc=([A-Z]{2})/);
+        const countryCode = locMatch ? locMatch[1] : 'XX';
+        const isCuba = countryCode === 'CU';
         
         if (response.ok) {
-          // 15% de las veces, redirigir al intermedio de noticriisp.com
-          if (data.mirrored && Math.random() < 0.15) {
+          // 15% de las veces, redirigir al intermedio de noticriisp.com (EXCEPTO si es de Cuba)
+          if (!isCuba && data.mirrored && Math.random() < 0.15) {
             window.location.href = `https://noti.noticriisp.com/l/${code}`;
             return;
           }
